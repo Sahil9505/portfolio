@@ -63,7 +63,7 @@ export default function Home({ adminProjects, theme, onToggleTheme, performanceM
       </SectionBand>
 
       <SectionBand tone="soft" withTopDivider withBottomDivider>
-        <Projects adminProjects={adminProjects} />
+        <Projects adminProjects={adminProjects} performanceMode={performanceMode} />
       </SectionBand>
 
       <SectionBand tone="deep" withTopDivider withBottomDivider>

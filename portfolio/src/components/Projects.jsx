@@ -340,11 +340,15 @@ function ProjectCard({ project }) {
   )
 }
 
-export default function Projects({ adminProjects = [] }) {
+export default function Projects({ adminProjects = [], performanceMode = {} }) {
   const [githubRepos, setGithubRepos] = useState([])
   const [readmeDescriptions, setReadmeDescriptions] = useState({})
   const [useFallback, setUseFallback] = useState(false)
   const [activeFilter, setActiveFilter] = useState('All')
+  const [isFetchingRepos, setIsFetchingRepos] = useState(false)
+  const [isFetchingReadmes, setIsFetchingReadmes] = useState(false)
+  const shouldReduceMotion = Boolean(performanceMode?.lowPerformanceMode)
+  const isLoadingGithub = !useFallback && (isFetchingRepos || isFetchingReadmes)
 
   const fallbackProjects = [...adminProjects, ...projects]
   const filters = ['All', 'Frontend', 'Backend', 'Full Stack']
@@ -398,6 +402,14 @@ export default function Projects({ adminProjects = [] }) {
 
   useEffect(() => {
     async function fetchRepos() {
+      if (shouldReduceMotion) {
+        setUseFallback(true)
+        setIsFetchingRepos(false)
+        return
+      }
+
+      setIsFetchingRepos(true)
+
       try {
         const data = await fetchAllGithubRepos(GITHUB_USERNAME)
 
@@ -409,15 +421,22 @@ export default function Projects({ adminProjects = [] }) {
         }
       } catch {
         setUseFallback(true)
+      } finally {
+        setIsFetchingRepos(false)
       }
     }
 
     fetchRepos()
-  }, [])
+  }, [shouldReduceMotion])
 
   useEffect(() => {
     async function fetchReadmes() {
-      if (useFallback || githubRepos.length === 0) return
+      if (useFallback || githubRepos.length === 0) {
+        setIsFetchingReadmes(false)
+        return
+      }
+
+      setIsFetchingReadmes(true)
 
       try {
         const entries = await Promise.all(
@@ -440,6 +459,8 @@ export default function Projects({ adminProjects = [] }) {
         setReadmeDescriptions(Object.fromEntries(entries))
       } catch {
         setReadmeDescriptions({})
+      } finally {
+        setIsFetchingReadmes(false)
       }
     }
 
@@ -511,14 +532,20 @@ export default function Projects({ adminProjects = [] }) {
   return (
     <motion.section
       id="projects"
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 40 }}
+      whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+      animate={shouldReduceMotion ? { opacity: 1, y: 0 } : undefined}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
       className="scroll-mt-24 mx-auto max-w-6xl px-4 py-12 md:px-6 md:py-16"
     >
       <h2 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl md:bg-gradient-to-r md:from-slate-900 md:to-indigo-800 md:bg-clip-text md:text-transparent dark:bg-gradient-to-r dark:from-cyan-200 dark:to-indigo-200 dark:bg-clip-text dark:text-transparent">Projects</h2>
       <p className="mt-3 max-w-2xl text-slate-700 dark:text-slate-400">Selected projects and experiments from my development journey.</p>
+      {isLoadingGithub ? (
+        <p className="mt-2 hidden text-sm font-medium text-indigo-700/90 md:block dark:text-indigo-300/90">
+          Loading GitHub projects...
+        </p>
+      ) : null}
 
       {featuredProjects.length > 0 ? (
         <div className="mt-8">

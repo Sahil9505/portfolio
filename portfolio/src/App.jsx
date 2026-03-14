@@ -51,7 +51,7 @@ function App() {
                 />
               }
             />
-            <Route path="/projects" element={<Projects adminProjects={adminProjects} />} />
+            <Route path="/projects" element={<Projects adminProjects={adminProjects} performanceMode={performanceMode} />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/admin" element={<Admin onAddProject={addProject} />} />
           </Routes>
