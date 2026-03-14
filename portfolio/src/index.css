@@ -327,3 +327,34 @@ body {
   animation: portfolio-dark-glow-float 18s ease-in-out infinite;
   will-change: transform, opacity;
 }
+
+.portfolio-particle--static,
+.portfolio-constellation-line--static,
+.portfolio-day-sun--static,
+.portfolio-day-cloud--static,
+.portfolio-dark-gradient-layer--static,
+.portfolio-dark-glow-layer--static {
+  animation: none;
+  will-change: auto;
+}
+
+.portfolio-particle--static {
+  opacity: var(--baseOpacity, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .portfolio-particle,
+  .portfolio-constellation-line,
+  .portfolio-day-sun,
+  .portfolio-day-cloud,
+  .portfolio-dark-gradient-layer,
+  .portfolio-dark-glow-layer,
+  .portfolio-shooting-star,
+  .portfolio-shooting-star::before {
+    animation: none !important;
+  }
+}

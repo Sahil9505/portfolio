@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Contact from './components/Contact'
 import Projects from './components/Projects'
 import SkyBackground from './components/SkyBackground'
+import usePerformanceMode from './hooks/usePerformanceMode'
 import Admin from './pages/Admin'
 import Home from './pages/Home'
 
@@ -17,6 +18,7 @@ function App() {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   })
   const [adminProjects, setAdminProjects] = useState([])
+  const performanceMode = usePerformanceMode()
 
   function addProject(project) {
     setAdminProjects((prev) => [project, ...prev])
@@ -34,13 +36,20 @@ function App() {
   return (
     <BrowserRouter>
       <div className="relative isolate min-h-screen overflow-x-hidden">
-        <SkyBackground theme={theme} />
+        <SkyBackground theme={theme} performanceMode={performanceMode} />
 
         <div className="relative z-10">
           <Routes>
             <Route
               path="/"
-              element={<Home adminProjects={adminProjects} theme={theme} onToggleTheme={toggleTheme} />}
+              element={
+                <Home
+                  adminProjects={adminProjects}
+                  theme={theme}
+                  onToggleTheme={toggleTheme}
+                  performanceMode={performanceMode}
+                />
+              }
             />
             <Route path="/projects" element={<Projects adminProjects={adminProjects} />} />
             <Route path="/contact" element={<Contact />} />

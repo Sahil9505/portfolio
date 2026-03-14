@@ -9,7 +9,7 @@ function seededRandom(seed) {
   }
 }
 
-function createSkyData(count = 110) {
+function createSkyData(count = 110, lineLimit = 18) {
   const rand = seededRandom(1337)
   const stars = Array.from({ length: count }, (_, index) => {
     const tierRoll = rand()
@@ -46,8 +46,11 @@ function createSkyData(count = 110) {
     }
   })
 
-  // Build calm constellation-like lines by connecting a subset of nearby stars.
-  const focusStars = stars.filter((star) => star.isLarge).slice(0, 28)
+  if (lineLimit === 0) {
+    return { stars, lines: [] }
+  }
+
+  const focusStars = stars.filter((star) => star.isLarge).slice(0, Math.max(lineLimit * 2, 12))
   const used = new Set()
   const lines = []
 
@@ -71,7 +74,8 @@ function createSkyData(count = 110) {
 
     if (nearest) {
       const key = [a.id, nearest.id].sort((x, y) => x - y).join('-')
-      if (!used.has(key) && lines.length < 18) {
+
+      if (!used.has(key) && lines.length < lineLimit) {
         used.add(key)
         lines.push({
           id: key,
@@ -147,13 +151,29 @@ function createShootingStar(id) {
   }
 }
 
-export default function SkyBackground({ theme }) {
-  const skyData = useMemo(() => createSkyData(), [])
-  const cloudData = useMemo(() => createCloudData(), [])
+export default function SkyBackground({ theme, performanceMode }) {
+  const { isMobile = false, lowPerformanceMode = false } = performanceMode ?? {}
+  const skyData = useMemo(() => {
+    if (isMobile) return createSkyData(18, 0)
+    if (lowPerformanceMode) return createSkyData(42, 6)
+    return createSkyData(110, 18)
+  }, [isMobile, lowPerformanceMode])
+  const cloudData = useMemo(() => {
+    if (isMobile) return []
+    if (lowPerformanceMode) return createCloudData(4)
+    return createCloudData(11)
+  }, [isMobile, lowPerformanceMode])
   const [shootingStars, setShootingStars] = useState([])
   const isDark = theme === 'dark'
+  const showBlurEffects = !isMobile
+  const showAnimatedSky = !lowPerformanceMode
 
   useEffect(() => {
+    if (!showAnimatedSky) {
+      setShootingStars([])
+      return undefined
+    }
+
     let isDisposed = false
     let nextBurstTimer = null
     const removalTimers = []
@@ -196,13 +216,10 @@ export default function SkyBackground({ theme }) {
       if (nextBurstTimer) window.clearTimeout(nextBurstTimer)
       removalTimers.forEach((timerId) => window.clearTimeout(timerId))
     }
-  }, [])
+  }, [showAnimatedSky])
 
   return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
-    >
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       <div
         className={`absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,_#f0f9ff_0%,_#dbeafe_32%,_#bfdbfe_58%,_#c7d2fe_100%)] transition-opacity duration-[1200ms] ease-in-out ${
           isDark ? 'opacity-0' : 'opacity-100'
@@ -214,7 +231,7 @@ export default function SkyBackground({ theme }) {
         }`}
       />
       <div
-        className={`portfolio-dark-gradient-layer absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(120,120,255,0.15)_0%,transparent_45%),radial-gradient(circle_at_82%_18%,rgba(147,197,253,0.12)_0%,transparent_42%),radial-gradient(circle_at_64%_76%,rgba(139,92,246,0.14)_0%,transparent_52%)] transition-opacity duration-[1200ms] ease-in-out ${
+        className={`${showAnimatedSky ? 'portfolio-dark-gradient-layer' : 'portfolio-dark-gradient-layer--static'} absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(120,120,255,0.15)_0%,transparent_45%),radial-gradient(circle_at_82%_18%,rgba(147,197,253,0.12)_0%,transparent_42%),radial-gradient(circle_at_64%_76%,rgba(139,92,246,0.14)_0%,transparent_52%)] transition-opacity duration-[1200ms] ease-in-out ${
           isDark ? 'opacity-100' : 'opacity-0'
         }`}
       />
@@ -223,20 +240,23 @@ export default function SkyBackground({ theme }) {
           isDark ? 'opacity-100' : 'opacity-0'
         }`}
       />
-      <div className={`absolute inset-0 overflow-hidden transition-opacity duration-[1100ms] ease-in-out ${isDark ? 'opacity-100' : 'opacity-0'}`}>
-        <span className="portfolio-dark-glow-layer absolute -left-[10%] top-[14%] h-[28rem] w-[28rem] rounded-full bg-indigo-500/16 blur-3xl" />
-        <span className="portfolio-dark-glow-layer absolute right-[-8%] top-[38%] h-[24rem] w-[24rem] rounded-full bg-violet-500/14 blur-3xl" style={{ animationDelay: '1.7s' }} />
-        <span className="portfolio-dark-glow-layer absolute left-[34%] bottom-[-10%] h-[22rem] w-[22rem] rounded-full bg-blue-400/12 blur-3xl" style={{ animationDelay: '0.9s', animationDuration: '20s' }} />
-      </div>
+
+      {showBlurEffects ? (
+        <div className={`absolute inset-0 overflow-hidden transition-opacity duration-[1100ms] ease-in-out ${isDark ? 'opacity-100' : 'opacity-0'}`}>
+          <span className={`${showAnimatedSky ? 'portfolio-dark-glow-layer' : 'portfolio-dark-glow-layer--static'} absolute -left-[10%] top-[14%] h-[28rem] w-[28rem] rounded-full bg-indigo-500/16 blur-3xl`} />
+          <span className={`${showAnimatedSky ? 'portfolio-dark-glow-layer' : 'portfolio-dark-glow-layer--static'} absolute right-[-8%] top-[38%] h-[24rem] w-[24rem] rounded-full bg-violet-500/14 blur-3xl`} style={{ animationDelay: '1.7s' }} />
+          <span className={`${showAnimatedSky ? 'portfolio-dark-glow-layer' : 'portfolio-dark-glow-layer--static'} absolute left-[34%] bottom-[-10%] h-[22rem] w-[22rem] rounded-full bg-blue-400/12 blur-3xl`} style={{ animationDelay: '0.9s', animationDuration: '20s' }} />
+        </div>
+      ) : null}
 
       <div className={`absolute inset-0 transition-opacity duration-[1100ms] ease-in-out ${isDark ? 'opacity-0' : 'opacity-100'}`}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_18%,rgba(255,255,255,0.62)_0%,rgba(255,255,255,0.26)_28%,transparent_62%)]" />
-        <div className="portfolio-day-sun" />
+        <div className={showAnimatedSky ? 'portfolio-day-sun' : 'portfolio-day-sun portfolio-day-sun--static'} />
 
         {cloudData.map((cloud) => (
           <div
             key={`day-cloud-${cloud.id}`}
-            className="portfolio-day-cloud"
+            className={showAnimatedSky ? 'portfolio-day-cloud' : 'portfolio-day-cloud portfolio-day-cloud--static'}
             style={{
               top: `${cloud.top}%`,
               left: `${cloud.left}%`,
@@ -251,61 +271,65 @@ export default function SkyBackground({ theme }) {
       </div>
 
       <div className={`absolute inset-0 transition-opacity duration-[1000ms] ease-in-out ${isDark ? 'opacity-100' : 'opacity-0'}`}>
-        <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
-          {skyData.lines.map((line) => (
-            <line
-              key={line.id}
-              x1={line.x1}
-              y1={line.y1}
-              x2={line.x2}
-              y2={line.y2}
-              className="portfolio-constellation-line"
-              style={{ '--lineOpacity': line.opacity }}
-            />
-          ))}
-        </svg>
+        {skyData.lines.length > 0 ? (
+          <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
+            {skyData.lines.map((line) => (
+              <line
+                key={line.id}
+                x1={line.x1}
+                y1={line.y1}
+                x2={line.x2}
+                y2={line.y2}
+                className={showAnimatedSky ? 'portfolio-constellation-line' : 'portfolio-constellation-line portfolio-constellation-line--static'}
+                style={{ '--lineOpacity': line.opacity }}
+              />
+            ))}
+          </svg>
+        ) : null}
 
-        {shootingStars.map((star) => (
-          <span
-            key={`shooting-star-${star.id}`}
-            className="portfolio-shooting-star"
-            style={{
-              top: `${star.top}%`,
-              left: `${star.left}%`,
-              '--shootDuration': star.duration,
-              '--shootX': star.driftX,
-              '--shootY': star.driftY,
-              '--shootAngle': star.angle,
-              '--trailLength': star.trail,
-              '--headSize': star.head,
-            }}
-          />
-        ))}
+        {showAnimatedSky
+          ? shootingStars.map((star) => (
+              <span
+                key={`shooting-star-${star.id}`}
+                className="portfolio-shooting-star"
+                style={{
+                  top: `${star.top}%`,
+                  left: `${star.left}%`,
+                  '--shootDuration': star.duration,
+                  '--shootX': star.driftX,
+                  '--shootY': star.driftY,
+                  '--shootAngle': star.angle,
+                  '--trailLength': star.trail,
+                  '--headSize': star.head,
+                }}
+              />
+            ))
+          : null}
       </div>
 
       <div className={`absolute inset-0 transition-opacity duration-[900ms] ease-in-out ${isDark ? 'opacity-100' : 'opacity-0'}`}>
         {skyData.stars.map((star) => (
-        <span
-          key={`global-particle-${star.id}`}
-          className={`portfolio-particle ${star.isLarge ? 'portfolio-particle--large' : ''} portfolio-particle--${star.depth}`}
-          style={{
-            top: `${star.top}%`,
-            left: `${star.left}%`,
-            width: `${star.size}px`,
-            height: `${star.size}px`,
-            animationDelay: star.delay,
-            animationDuration: star.duration,
-            '--baseOpacity': star.baseOpacity,
-            '--starBrightness': star.brightness,
-            '--starGlowOpacity': star.glowOpacity,
-            '--dx1': star.dx1,
-            '--dy1': star.dy1,
-            '--dx2': star.dx2,
-            '--dy2': star.dy2,
-            '--twinklePeak': star.peak,
-            '--twinkleScale': star.twinkleScale,
-          }}
-        />
+          <span
+            key={`global-particle-${star.id}`}
+            className={`portfolio-particle ${showAnimatedSky ? '' : 'portfolio-particle--static'} ${star.isLarge ? 'portfolio-particle--large' : ''} portfolio-particle--${star.depth}`}
+            style={{
+              top: `${star.top}%`,
+              left: `${star.left}%`,
+              width: `${star.size}px`,
+              height: `${star.size}px`,
+              animationDelay: showAnimatedSky ? star.delay : undefined,
+              animationDuration: showAnimatedSky ? star.duration : undefined,
+              '--baseOpacity': star.baseOpacity,
+              '--starBrightness': star.brightness,
+              '--starGlowOpacity': star.glowOpacity,
+              '--dx1': star.dx1,
+              '--dy1': star.dy1,
+              '--dx2': star.dx2,
+              '--dy2': star.dy2,
+              '--twinklePeak': star.peak,
+              '--twinkleScale': star.twinkleScale,
+            }}
+          />
         ))}
       </div>
 

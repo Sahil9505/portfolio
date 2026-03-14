@@ -21,13 +21,16 @@ const particles = [
   { size: 3, top: '88%', left: '86%', duration: 22, delay: 1.3, drift: 12, opacity: 0.31 },
 ]
 
-export default function Hero() {
+export default function Hero({ performanceMode }) {
+  const { isMobile = false, lowPerformanceMode = false } = performanceMode ?? {}
   const pointerX = useMotionValue(0)
   const pointerY = useMotionValue(0)
   const parallaxX = useSpring(pointerX, { stiffness: 28, damping: 18, mass: 0.7 })
   const parallaxY = useSpring(pointerY, { stiffness: 28, damping: 18, mass: 0.7 })
   const slowLayerX = useTransform(parallaxX, (v) => v * 0.28)
   const slowLayerY = useTransform(parallaxY, (v) => v * 0.2)
+  const showAmbientMotion = !lowPerformanceMode
+  const showBlurLayers = !isMobile
 
   const textItem = {
     hidden: { opacity: 0, y: 20 },
@@ -50,54 +53,60 @@ export default function Hero() {
   return (
     <motion.section
       id="home"
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ staggerChildren: 0.14 }}
+      initial={lowPerformanceMode ? false : 'hidden'}
+      whileInView={lowPerformanceMode ? undefined : 'visible'}
+      viewport={lowPerformanceMode ? undefined : { once: true, amount: 0.2 }}
+      transition={lowPerformanceMode ? undefined : { staggerChildren: 0.14 }}
       className="scroll-mt-24 relative mx-auto grid max-w-6xl gap-6 px-4 pb-10 pt-4 md:grid-cols-[1.05fr_0.95fr] md:items-end md:gap-10 md:px-6 md:pb-16 md:pt-14"
-      onMouseMove={handlePointerMove}
-      onMouseLeave={handlePointerLeave}
+      onMouseMove={showAmbientMotion ? handlePointerMove : undefined}
+      onMouseLeave={showAmbientMotion ? handlePointerLeave : undefined}
     >
-      <motion.div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0" style={{ x: slowLayerX, y: slowLayerY }}>
-        {particles.map((particle, index) => (
-          <motion.span
-            key={index}
-            className="absolute rounded-full bg-indigo-300 dark:bg-cyan-200"
-            style={{
-              top: particle.top,
-              left: particle.left,
-              width: `${particle.size}px`,
-              height: `${particle.size}px`,
-              opacity: particle.opacity,
-              boxShadow: '0 0 10px rgba(129, 140, 248, 0.35)',
-            }}
-            animate={{
-              y: [0, -particle.drift, 0],
-              x: [0, particle.drift * 0.25, 0],
-              opacity: [particle.opacity * 0.65, particle.opacity, particle.opacity * 0.65],
-            }}
-            transition={{
-              duration: particle.duration,
-              delay: particle.delay,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
-        ))}
-      </motion.div>
+      {showAmbientMotion ? (
+        <motion.div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0" style={{ x: slowLayerX, y: slowLayerY }}>
+          {particles.map((particle, index) => (
+            <motion.span
+              key={index}
+              className="absolute rounded-full bg-indigo-300 dark:bg-cyan-200"
+              style={{
+                top: particle.top,
+                left: particle.left,
+                width: `${particle.size}px`,
+                height: `${particle.size}px`,
+                opacity: particle.opacity,
+                boxShadow: '0 0 10px rgba(129, 140, 248, 0.35)',
+              }}
+              animate={{
+                y: [0, -particle.drift, 0],
+                x: [0, particle.drift * 0.25, 0],
+                opacity: [particle.opacity * 0.65, particle.opacity, particle.opacity * 0.65],
+              }}
+              transition={{
+                duration: particle.duration,
+                delay: particle.delay,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+            />
+          ))}
+        </motion.div>
+      ) : null}
 
-      <motion.div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-20 left-1/2 z-0 h-72 w-72 -translate-x-1/2 rounded-full bg-cyan-300/30 blur-3xl dark:bg-cyan-600/20"
-        animate={{ scale: [1, 1.08, 1], x: [0, 12, 0], y: [0, -8, 0] }}
-        transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-8 top-12 z-0 h-64 w-64 rounded-full bg-blue-300/30 blur-3xl dark:bg-blue-700/25"
-        animate={{ scale: [1, 1.06, 1], x: [0, -10, 0], y: [0, 10, 0] }}
-        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-      />
+      {showAmbientMotion && showBlurLayers ? (
+        <>
+          <motion.div
+            aria-hidden="true"
+            className="pointer-events-none absolute -top-20 left-1/2 z-0 h-72 w-72 -translate-x-1/2 rounded-full bg-cyan-300/30 blur-3xl dark:bg-cyan-600/20"
+            animate={{ scale: [1, 1.08, 1], x: [0, 12, 0], y: [0, -8, 0] }}
+            transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <motion.div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-8 top-12 z-0 h-64 w-64 rounded-full bg-blue-300/30 blur-3xl dark:bg-blue-700/25"
+            animate={{ scale: [1, 1.06, 1], x: [0, -10, 0], y: [0, 10, 0] }}
+            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+          />
+        </>
+      ) : null}
 
       <div className="relative z-10 max-w-3xl pt-1 md:pt-0">
         <motion.h1
@@ -169,8 +178,8 @@ export default function Hero() {
         style={{ transformStyle: 'preserve-3d' }}
       >
         <motion.div
-          animate={{ y: [0, -6, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+          animate={showAmbientMotion ? { y: [0, -6, 0] } : undefined}
+          transition={showAmbientMotion ? { duration: 6, repeat: Infinity, ease: 'easeInOut' } : undefined}
           className="relative mx-auto h-32 w-32 rounded-full border-4 border-white/85 bg-white p-1 shadow-[0_10px_24px_rgba(99,102,241,0.24)] ring-1 ring-indigo-200/70 dark:border-slate-900 dark:bg-slate-900 dark:ring-indigo-300/35 sm:absolute sm:left-1/2 sm:top-0 sm:h-[164px] sm:w-[164px] sm:-translate-x-1/2 sm:-translate-y-[62%]"
         >
           <img
@@ -182,8 +191,8 @@ export default function Hero() {
         </motion.div>
 
         <motion.div
-          animate={{ y: [0, -8, 0], rotate: [0, 0.8, 0, -0.8, 0] }}
-          transition={{ duration: 6.5, repeat: Infinity, ease: 'easeInOut' }}
+          animate={showAmbientMotion ? { y: [0, -8, 0], rotate: [0, 0.8, 0, -0.8, 0] } : undefined}
+          transition={showAmbientMotion ? { duration: 6.5, repeat: Infinity, ease: 'easeInOut' } : undefined}
           className="mt-4 sm:mt-0"
         >
           <p className="mt-1 text-center text-sm font-medium text-slate-600 dark:text-slate-400">Developer Profile</p>

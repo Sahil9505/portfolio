@@ -45,13 +45,13 @@ function SectionBand({ children, tone = 'base', withTopDivider = false, withBott
   )
 }
 
-export default function Home({ adminProjects, theme, onToggleTheme }) {
+export default function Home({ adminProjects, theme, onToggleTheme, performanceMode }) {
   return (
     <main className="relative overflow-x-clip pt-20 md:pt-16">
       <Navbar theme={theme} onToggleTheme={onToggleTheme} />
 
       <SectionBand tone="base">
-        <Hero />
+        <Hero performanceMode={performanceMode} />
       </SectionBand>
 
       <SectionBand tone="soft" withTopDivider withBottomDivider>
