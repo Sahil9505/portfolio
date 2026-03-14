@@ -1,0 +1,315 @@
+@import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #f7f8fb;
+  color: #0f172a;
+}
+
+.dark body {
+  background: #020617;
+  color: #e2e8f0;
+}
+
+@keyframes portfolio-particle-drift-twinkle {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: var(--baseOpacity, 0.2);
+  }
+
+  23% {
+    transform: translate3d(var(--dx1, 4px), var(--dy1, -8px), 0) scale(var(--twinkleScale, 1.08));
+    opacity: var(--twinklePeak, 0.62);
+  }
+
+  54% {
+    transform: translate3d(var(--dx2, -3px), var(--dy2, 3px), 0) scale(0.98);
+    opacity: calc(var(--twinklePeak, 0.62) - 0.1);
+  }
+
+  76% {
+    transform: translate3d(calc(var(--dx1, 4px) * 0.45), calc(var(--dy1, -8px) * 0.35), 0) scale(1.02);
+    opacity: calc(var(--twinklePeak, 0.62) - 0.05);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: var(--baseOpacity, 0.2);
+  }
+}
+
+.portfolio-particle {
+  position: absolute;
+  border-radius: 9999px;
+  background: rgba(148, 163, 184, 0.34);
+  box-shadow: 0 0 8px rgba(148, 163, 184, 0.24), 0 0 14px rgba(191, 219, 254, 0.14);
+  opacity: var(--baseOpacity, 0.22);
+  animation-name: portfolio-particle-drift-twinkle;
+  animation-timing-function: cubic-bezier(0.43, 0.05, 0.57, 0.95);
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+
+.dark .portfolio-particle {
+  background: rgba(196, 213, 255, var(--starBrightness, 0.72));
+  box-shadow:
+    0 0 10px rgba(147, 197, 253, var(--starGlowOpacity, 0.26)),
+    0 0 16px rgba(99, 102, 241, calc(var(--starGlowOpacity, 0.26) * 0.9)),
+    0 0 24px rgba(167, 139, 250, calc(var(--starGlowOpacity, 0.26) * 0.6));
+  opacity: var(--baseOpacity, 0.24);
+}
+
+.dark .portfolio-particle--large {
+  background: rgba(236, 244, 255, calc(var(--starBrightness, 0.82) + 0.08));
+  box-shadow:
+    0 0 14px rgba(186, 230, 253, calc(var(--starGlowOpacity, 0.3) + 0.05)),
+    0 0 24px rgba(129, 140, 248, calc(var(--starGlowOpacity, 0.3) + 0.04)),
+    0 0 34px rgba(167, 139, 250, calc(var(--starGlowOpacity, 0.3) + 0.02));
+}
+
+.dark .portfolio-particle--near {
+  filter: drop-shadow(0 0 2px rgba(196, 181, 253, 0.32));
+}
+
+.dark .portfolio-particle--mid {
+  filter: drop-shadow(0 0 1.4px rgba(147, 197, 253, 0.2));
+}
+
+.dark .portfolio-particle--far {
+  filter: none;
+}
+
+@keyframes constellation-breathe {
+  0% {
+    opacity: calc(var(--lineOpacity, 0.14) * 0.65);
+  }
+
+  50% {
+    opacity: var(--lineOpacity, 0.14);
+  }
+
+  100% {
+    opacity: calc(var(--lineOpacity, 0.14) * 0.65);
+  }
+}
+
+.portfolio-constellation-line {
+  stroke: rgba(165, 180, 252, 0.42);
+  stroke-width: 0.55;
+  opacity: var(--lineOpacity, 0.14);
+  filter: drop-shadow(0 0 2px rgba(129, 140, 248, 0.25));
+  animation: constellation-breathe 8s ease-in-out infinite;
+}
+
+@keyframes shooting-star-drift {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(var(--shootAngle, -30deg));
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  88% {
+    transform: translate3d(var(--shootX, 34vw), var(--shootY, 22vh), 0)
+      rotate(var(--shootAngle, -30deg));
+    opacity: 0.16;
+  }
+
+  100% {
+    transform: translate3d(var(--shootX, 34vw), var(--shootY, 22vh), 0)
+      rotate(var(--shootAngle, -30deg));
+    opacity: 0;
+  }
+}
+
+@keyframes shooting-star-tail {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) scaleX(0.55);
+  }
+
+  12% {
+    opacity: 0.9;
+    transform: translateY(-50%) scaleX(1);
+  }
+
+  70% {
+    opacity: 0.3;
+    transform: translateY(-50%) scaleX(0.88);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) scaleX(0.6);
+  }
+}
+
+.portfolio-shooting-star {
+  position: absolute;
+  width: var(--headSize, 2.4px);
+  height: var(--headSize, 2.4px);
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(248, 250, 255, 1) 0%, rgba(224, 231, 255, 0.94) 60%, rgba(224, 231, 255, 0.6) 100%);
+  box-shadow: 0 0 12px rgba(191, 219, 254, 0.92), 0 0 22px rgba(129, 140, 248, 0.5);
+  animation: shooting-star-drift var(--shootDuration, 1.6s) ease-out 1 both;
+  will-change: transform, opacity;
+}
+
+.portfolio-shooting-star::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: calc(var(--trailLength, 70px) * -1);
+  width: var(--trailLength, 70px);
+  height: 1px;
+  transform: translateY(-50%);
+  background: linear-gradient(
+    to right,
+    rgba(191, 219, 254, 0) 0%,
+    rgba(191, 219, 254, 0.04) 18%,
+    rgba(191, 219, 254, 0.26) 52%,
+    rgba(224, 231, 255, 0.72) 82%,
+    rgba(248, 250, 255, 0.95) 100%
+  );
+  filter: blur(0.32px);
+  animation: shooting-star-tail var(--shootDuration, 1.6s) ease-out 1 both;
+  transform-origin: right center;
+}
+
+@keyframes portfolio-day-sun-breathe {
+  0% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+}
+
+.portfolio-day-sun {
+  position: absolute;
+  top: 5%;
+  right: 8%;
+  width: 92px;
+  height: 92px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 251, 209, 1) 0%, rgba(255, 236, 147, 0.95) 42%, rgba(255, 216, 122, 0.9) 100%);
+  box-shadow: 0 0 45px rgba(255, 214, 115, 0.38), 0 0 110px rgba(191, 219, 254, 0.22);
+  animation: portfolio-day-sun-breathe 12s ease-in-out infinite;
+}
+
+.portfolio-day-sun::before {
+  content: '';
+  position: absolute;
+  inset: -28px;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(255, 236, 147, 0.25) 0%, rgba(255, 236, 147, 0.08) 45%, transparent 75%);
+}
+
+@keyframes portfolio-cloud-drift {
+  0% {
+    transform: translate3d(calc(var(--cloudDrift, 14vw) * -1), 0, 0);
+  }
+
+  50% {
+    transform: translate3d(calc(var(--cloudDrift, 14vw) * 0.25), -3px, 0);
+  }
+
+  100% {
+    transform: translate3d(var(--cloudDrift, 14vw), 0, 0);
+  }
+}
+
+.portfolio-day-cloud {
+  position: absolute;
+  width: var(--cloudWidth, 180px);
+  height: calc(var(--cloudWidth, 180px) * 0.34);
+  border-radius: 9999px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.74));
+  opacity: var(--cloudOpacity, 0.48);
+  box-shadow: 0 10px 30px rgba(148, 163, 184, 0.14);
+  filter: blur(0.18px);
+  animation: portfolio-cloud-drift var(--cloudDuration, 48s) ease-in-out var(--cloudDelay, 0s) infinite;
+}
+
+.portfolio-day-cloud::before,
+.portfolio-day-cloud::after {
+  content: '';
+  position: absolute;
+  border-radius: 9999px;
+  background: inherit;
+}
+
+.portfolio-day-cloud::before {
+  width: 42%;
+  height: 130%;
+  left: 14%;
+  top: -52%;
+}
+
+.portfolio-day-cloud::after {
+  width: 36%;
+  height: 118%;
+  right: 16%;
+  top: -44%;
+}
+
+@keyframes portfolio-dark-gradient-shift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.75;
+  }
+
+  50% {
+    transform: translate3d(-2.2%, -1.8%, 0) scale(1.04);
+    opacity: 0.92;
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.75;
+  }
+}
+
+@keyframes portfolio-dark-glow-float {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.32;
+  }
+
+  50% {
+    transform: translate3d(2.5%, -2.5%, 0) scale(1.08);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.32;
+  }
+}
+
+.portfolio-dark-gradient-layer {
+  animation: portfolio-dark-gradient-shift 22s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.portfolio-dark-glow-layer {
+  animation: portfolio-dark-glow-float 18s ease-in-out infinite;
+  will-change: transform, opacity;
+}
