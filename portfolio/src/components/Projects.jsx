@@ -5,6 +5,51 @@ import projects from '../data/projects'
 
 const GITHUB_USERNAME = 'Sahil9505'
 
+const CUSTOM_PROJECT_MEDIA = [
+  {
+    keywords: ['portfolio'],
+    image: '/portfolio.png',
+    screenshots: ['/portfolio.png'],
+  },
+  {
+    keywords: ['ielts'],
+    image: '/ielts.png',
+    screenshots: ['/ielts.png'],
+  },
+  {
+    keywords: ['eventplanning', 'event-planning', 'event planning'],
+    image: '/Eventplanning%20dashboard.png',
+    screenshots: ['/Eventplanning%20dashboard.png'],
+  },
+  {
+    keywords: ['tictactoe', 'tic-tac-toe', 'tic tac toe'],
+    image: '/tictactoe.png',
+    screenshots: ['/tictactoe.png'],
+  },
+  {
+    keywords: ['jobfinder', 'job-finder', 'job finder'],
+    image: '/job%20finder.png',
+    screenshots: ['/job%20finder.png'],
+  },
+]
+
+function getCustomProjectMedia(repoName) {
+  if (typeof repoName !== 'string' || repoName.trim() === '') return null
+
+  const normalizedRepoName = repoName.toLowerCase()
+
+  const matchedMedia = CUSTOM_PROJECT_MEDIA.find(({ keywords }) =>
+    keywords.some((keyword) => normalizedRepoName.includes(keyword))
+  )
+
+  return matchedMedia
+    ? {
+        image: matchedMedia.image,
+        screenshots: matchedMedia.screenshots,
+      }
+    : null
+}
+
 async function fetchAllGithubRepos(username) {
   const allRepos = []
   let page = 1
@@ -178,13 +223,13 @@ function ProjectCard({ project }) {
       variants={projectCardVariants}
       className="group relative flex h-full min-h-[25.5rem] w-full flex-col overflow-hidden rounded-2xl border border-white/45 bg-gradient-to-br from-white/65 via-white/45 to-indigo-100/35 shadow-[0_10px_26px_rgba(15,23,42,0.16)] backdrop-blur-xl ring-1 ring-inset ring-white/30 transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_34px_rgba(15,23,42,0.2),0_0_18px_rgba(99,102,241,0.2)] sm:min-h-[26.5rem] dark:border-indigo-200/15 dark:bg-gradient-to-br dark:from-slate-900/55 dark:via-slate-900/38 dark:to-indigo-950/34 dark:shadow-[0_10px_30px_rgba(0,0,0,0.42)] dark:ring-indigo-100/10 dark:hover:shadow-[0_16px_36px_rgba(0,0,0,0.5),0_0_22px_rgba(99,102,241,0.24)]"
     >
-      <div className="relative h-52 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+      <div className="relative h-52 w-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
         <AnimatePresence mode="wait" initial={false}>
           <motion.img
             key={`${project.title}-image-${activeImageIndex}`}
             src={screenshots[activeImageIndex]}
             alt={`${project.title} screenshot ${activeImageIndex + 1}`}
-            className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
+            className="absolute inset-0 h-full w-full p-2 object-contain object-center transition-transform duration-500 group-hover:scale-[1.03]"
             loading="lazy"
             initial={{ opacity: 0, x: 18, scale: 1.05 }}
             animate={{ opacity: 1, x: 0, scale: 1.02 }}
@@ -408,34 +453,42 @@ export default function Projects({ adminProjects = [] }) {
     .slice(0, 2)
 
   const githubProjects = !useFallback && githubRepos.length > 0
-    ? githubRepos.map((repo) => ({
-        title: formatRepoName(repo.name),
-        description: readmeDescriptions[repo.full_name] || repo.description || 'No description provided.',
-        category: getCategoryByLanguage(repo.language),
-        technologies: repo.language ? [repo.language] : ['General'],
-        keyFeatures: [
-          'Repository includes structured source code and modular components.',
-          'Implements practical features with version-controlled collaboration workflow.',
-          'Built and maintained with focus on readability and iterative improvement.',
-        ],
-        stars: repo.stargazers_count ?? 0,
-        forks: repo.forks_count ?? 0,
-        githubLink: repo.html_url,
-        liveLink: typeof repo.homepage === 'string' ? repo.homepage.trim() : '',
-        image:
-          repo.owner?.login && repo.name
-            ? `https://opengraph.githubassets.com/1/${repo.owner.login}/${repo.name}`
-            : '',
-        screenshots:
-          repo.owner?.login && repo.name
-            ? [
-                `https://opengraph.githubassets.com/1/${repo.owner.login}/${repo.name}`,
-                `https://dummyimage.com/1200x700/e2e8f0/334155&text=${encodeURIComponent(repo.name)}+Preview+2`,
-                `https://dummyimage.com/1200x700/e2e8f0/334155&text=${encodeURIComponent(repo.name)}+Preview+3`,
-              ]
-            : [],
-        key: repo.id,
-      }))
+    ? githubRepos.map((repo) => {
+        const customMedia = getCustomProjectMedia(repo.name)
+
+        return {
+          title: formatRepoName(repo.name),
+          description: readmeDescriptions[repo.full_name] || repo.description || 'No description provided.',
+          category: getCategoryByLanguage(repo.language),
+          technologies: repo.language ? [repo.language] : ['General'],
+          keyFeatures: [
+            'Repository includes structured source code and modular components.',
+            'Implements practical features with version-controlled collaboration workflow.',
+            'Built and maintained with focus on readability and iterative improvement.',
+          ],
+          stars: repo.stargazers_count ?? 0,
+          forks: repo.forks_count ?? 0,
+          githubLink: repo.html_url,
+          liveLink: typeof repo.homepage === 'string' ? repo.homepage.trim() : '',
+          image: customMedia?.image ||
+            (
+              repo.owner?.login && repo.name
+                ? `https://opengraph.githubassets.com/1/${repo.owner.login}/${repo.name}`
+                : ''
+            ),
+          screenshots: customMedia?.screenshots ||
+            (
+              repo.owner?.login && repo.name
+                ? [
+                    `https://opengraph.githubassets.com/1/${repo.owner.login}/${repo.name}`,
+                    `https://dummyimage.com/1200x700/e2e8f0/334155&text=${encodeURIComponent(repo.name)}+Preview+2`,
+                    `https://dummyimage.com/1200x700/e2e8f0/334155&text=${encodeURIComponent(repo.name)}+Preview+3`,
+                  ]
+                : []
+            ),
+          key: repo.id,
+        }
+      })
     : []
 
   const mergedProjects = [...normalizedFallbackProjects, ...githubProjects]
