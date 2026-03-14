@@ -113,9 +113,9 @@ export default function Contact() {
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-indigo-200 bg-white text-indigo-700 shadow-sm dark:border-indigo-300/35 dark:bg-slate-900/45 dark:text-indigo-100">
                     <Icon size={18} strokeWidth={2} />
                   </span>
-                  <span>
+                  <span className="min-w-0 flex-1">
                     <span className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{item.label}</span>
-                    <span className="block text-sm font-medium text-slate-800 dark:text-slate-200">{item.value}</span>
+                    <span className="block break-all text-sm font-medium text-slate-800 sm:break-normal dark:text-slate-200">{item.value}</span>
                   </span>
                 </>
               )

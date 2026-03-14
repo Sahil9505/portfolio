@@ -95,7 +95,7 @@ export default function About() {
                     {category.items.map((item) => (
                       <span
                         key={`${category.title}-${item.name}`}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-white/85 px-2.5 py-1 text-xs font-semibold text-indigo-700 shadow-sm dark:border-indigo-300/30 dark:bg-slate-900/55 dark:text-indigo-200"
+                        className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-indigo-200 bg-white/85 px-2.5 py-1 text-xs font-semibold text-indigo-700 shadow-sm whitespace-normal break-words dark:border-indigo-300/30 dark:bg-slate-900/55 dark:text-indigo-200"
                       >
                         <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-100 px-1 text-[10px] font-bold tracking-wide text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-200">
                           {item.symbol}

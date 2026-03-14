@@ -3,7 +3,14 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 88px;
+  scroll-padding-top: 76px;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
 }
 
 body {
@@ -11,11 +18,18 @@ body {
   min-width: 320px;
   background: #f7f8fb;
   color: #0f172a;
+  overflow-x: hidden;
 }
 
 .dark body {
   background: #020617;
   color: #e2e8f0;
+}
+
+@media (min-width: 768px) {
+  html {
+    scroll-padding-top: 88px;
+  }
 }
 
 @keyframes portfolio-particle-drift-twinkle {
